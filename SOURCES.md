@@ -38,13 +38,12 @@
 | https://v.firebog.net/hosts/RPiList-Malware.txt | 2025-06-27T16:38:31Z | malware | 563115 | 37.4 MB | CC BY-NC 4.0 (https://github.com/RPiList/specials/blob/master/LICENSE.md) | malware/malware_rpilist.rpz | Skipped |
 | https://v.firebog.net/hosts/static/w3kbl.txt | 2025-06-27T16:38:36Z | malware | 350 | 21.6 KB | MIT License (https://github.com/WaLLy3K/wally3k.github.io/blob/master/LICENSE) | malware/malware_w3kbl.rpz | Skipped |
 | https://big.oisd.nl/ | 2025-06-27T17:25:10Z | misc | 191391 | 10.4 MB | GNU GPL v3.0 (https://github.com/sjhgvr/oisd/blob/main/LICENSE) | misc/misc_oisd_big_list.rpz | Skipped |
-| https://nsfw.oisd.nl | 2025-06-27T16:38:40Z | misc | 412809 | 22.1 MB | GNU GPL v3.0 (https://github.com/sjhgvr/oisd/blob/main/LICENSE) | misc/misc_nsfw_oisd.rpz | Skipped |
-| https://nsfw-small.oisd.nl | 2025-06-27T16:38:45Z | misc | 21067 | 974.4 KB | GNU GPL v3.0 (https://github.com/sjhgvr/oisd/blob/main/LICENSE) | misc/misc_nsfw_small_oisd.rpz | Skipped |
+| https://nsfw.oisd.nl | 2025-06-27 | misc | 412866 | 22.1 MB | GNU GPL v3.0 (https://github.com/sjhgvr/oisd/blob/main/LICENSE) | misc/misc_nsfw_oisd.rpz | OK |
+| https://nsfw-small.oisd.nl | 2025-06-27 | misc | 21072 | 974.7 KB | GNU GPL v3.0 (https://github.com/sjhgvr/oisd/blob/main/LICENSE) | misc/misc_nsfw_small_oisd.rpz | OK |
 | https://small.oisd.nl | 2025-06-27T17:25:14Z | misc | 43372 | 2.3 MB | GNU GPL v3.0 (https://github.com/sjhgvr/oisd/blob/main/LICENSE) | misc/misc_oisd_small_list.rpz | Skipped |
 | https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts | 2025-06-27T16:38:48Z | misc | 917 | 54.7 KB | CC BY (https://github.com/AssoEchap/stalkerware-indicators#license) | misc/misc_stalkerware.rpz | Skipped |
 | https://raw.githubusercontent.com/StevenBlack/hosts/master/data/yoyo.org/hosts | 2025-06-27T16:38:48Z | misc | 3437 | 172.9 KB | MIT License (https://github.com/StevenBlack/hosts/blob/master/LICENSE) | misc/misc_stevenblack_yoyo.rpz | Skipped |
-| https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/phishing.txt | 2025-06-27T17:26:50Z | phishing | 0 | 0 B | GNU GPL v3.0 (https://github.com/hagezi/dns-blocklists/blob/main/LICENSE) | phishing/phishing_hagezi.rpz | Not Reachable |
-| https://urlhaus.abuse.ch/downloads/hostfile/ | 2025-06-27 | phishing | 540 | 29.3 KB | None specified | phishing/phishing_urlhaus.rpz | OK |
+| https://urlhaus.abuse.ch/downloads/hostfile/ | 2025-06-27 | phishing | 540 | 29.4 KB | None specified | phishing/phishing_urlhaus.rpz | OK |
 | https://raw.githubusercontent.com/anudeepND/blacklist/master/facebook.txt | 2025-06-27T16:38:48Z | social | 3995 | 321.8 KB | MIT License (https://github.com/anudeepND/blacklist/blob/master/LICENSE) | social/social_anudeep_facebook.rpz | Skipped |
 | https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/native.tiktok.extended.txt | 2025-06-27T16:38:48Z | social | 422 | 31.2 KB | GNU GPL v3.0 (https://github.com/hagezi/dns-blocklists/blob/main/LICENSE) | social/social_hagezi_native.tiktok.extended.rpz | Skipped |
 | https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/native.tiktok.txt | 2025-06-27T16:38:48Z | social | 322 | 23.1 KB | GNU GPL v3.0 (https://github.com/hagezi/dns-blocklists/blob/main/LICENSE) | social/social_hagezi_native.tiktok.rpz | Skipped |

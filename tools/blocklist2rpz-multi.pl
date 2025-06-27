@@ -354,10 +354,10 @@ foreach my $entry (@categorized_sources) {
     }
 
     # Convert to RPZ format
-    my $entry_count = 0;
-    my $file_path = 'N/A';
-    my $file_size = 0;
-    unless ($skip_update) {
+      my $entry_count = 0;
+      my $file_path = 'N/A';
+      my $file_size = 0;
+      unless ($skip_update) {
         my ($rpz_data, $count) = convert_blocklist_to_rpz($content, $source, $wildcards, $no_soa, $url_to_filename{$source}{comments});
         $entry_count = $count;
         my $filename = $url_to_filename{$source}{filename} || basename($source) . '.rpz';
@@ -368,75 +368,74 @@ foreach my $entry (@categorized_sources) {
         # Check if output file exists and compare hash
         log_message('DEBUG', "Checking if output file exists: $output_file") if $debug_level >= 2;
         if (-f $output_file) {
-    my $existing_content = read_file($output_file, binmode => ':raw') || ''; # Zeile 371
-    my $existing_hash = sha256_hex($existing_content); # Zeile 372
-    my $encoded_rpz_data = Encode::encode('UTF-8', $rpz_data, Encode::FB_QUIET); # Zeile 373
-    my $new_content_hash = sha256_hex($encoded_rpz_data); # Zeile 373
-        if (-f $output_file) {
-            my $existing_content = read_file($output_file, binmode => ':raw') || ''; # Zeile 371
-            my $existing_hash = sha256_hex($existing_content); # Zeile 372
-            my $encoded_rpz_data = Encode::encode('UTF-8', $rpz_data, Encode::FB_QUIET); # Zeile 373
-            my $new_content_hash = sha256_hex($encoded_rpz_data); # Zeile 373
-            if ($existing_hash eq $new_content_hash) {
-                log_message('INFO', "Output file $output_file unchanged, skipping write");
-                $skip_update = 1;
-                $file_size = (-s $output_file) / 1024;
-                $file_path = "$category/$filename";
-                $hashes{$source}{domains} = $entry_count;
-                $hashes{$source}{file_size} = $file_size;
-            } else {
-                log_message('WARNING', "Output file $output_file exists but content changed, overwriting");
-            }
-        }
-        unless ($skip_update) {
-            $rpz_data =~ s/\x{FEFF}//g; # Entferne BOM
-            open my $fh, '>:raw', $output_file or die "Cannot open $output_file: $!"; # Zeile 374
-            print $fh $rpz_data;
-            close $fh;
+          my $existing_content = read_file($output_file, binmode => ':raw') || '';
+          $existing_content =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
+          my $existing_hash = sha256_hex($existing_content);
+          my $clean_rpz_data = $rpz_data;
+          $clean_rpz_data =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
+          my $new_content_hash = sha256_hex($clean_rpz_data);
+          if ($existing_hash eq $new_content_hash) {
+            log_message('INFO', "Output file $output_file unchanged, skipping write");
+            $skip_update = 1;
             $file_size = (-s $output_file) / 1024;
             $file_path = "$category/$filename";
-            log_message('INFO', sprintf("Generated %s: %d entries, %.1f KB", $output_file, $entry_count, $file_size));
             $hashes{$source}{domains} = $entry_count;
             $hashes{$source}{file_size} = $file_size;
+          } else {
+            log_message('WARNING', "Output file $output_file exists but content changed, overwriting");
+          }
+        }
+        unless ($skip_update) {
+          my $clean_rpz_data = $rpz_data;
+          $clean_rpz_data =~ s/\x{FEFF}//g; # Remove BOM
+          $clean_rpz_data =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
+          open my $fh, '>:raw', $output_file or die "Cannot open $output_file: $!";
+          print $fh $clean_rpz_data;
+          close $fh;
+          $file_size = (-s $output_file) / 1024;
+          $file_path = "$category/$filename";
+          log_message('INFO', sprintf("Generated %s: %d entries, %.1f KB", $output_file, $entry_count, $file_size));
+          $hashes{$source}{domains} = $entry_count;
+          $hashes{$source}{file_size} = $file_size;
         }
         $list_stats{$source} = {
-            domains     => $entry_count,
-            error       => 0,
-            time        => time - $list_start,
-            skipped     => $skip_update,
-            status      => $skip_update ? 'Skipped' : 'OK',
-            file_size   => $file_size,
-            file_path   => $file_path,
-            last_updated => strftime("%Y-%m-%d", gmtime),
-            license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
+          domains     => $entry_count,
+          error       => 0,
+          time        => time - $list_start,
+          skipped     => $skip_update,
+          status      => $skip_update ? 'Skipped' : 'OK',
+          file_size   => $file_size,
+          file_path   => $file_path,
+          last_updated => strftime("%Y-%m-%d", gmtime),
+          license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
         };
         $ok++ unless $skip_update;
         # Validation
         if ($validate && !$skip_update) {
-            log_message('INFO', "Validating $output_file...");
-            my $validation_output = validate_rpz_file($output_file);
-            if ($validation_report) {
-                open my $vfh, '>>:encoding(UTF-8)', $validation_report or die "Cannot open validation report file '$validation_report': $!\n";
-                print $vfh $validation_output;
-                close $vfh;
-            } else {
-                print $validation_output;
-            }
+          log_message('INFO', "Validating $output_file...");
+          my $validation_output = validate_rpz_file($output_file);
+          if ($validation_report) {
+            open my $vfh, '>>:encoding(UTF-8)', $validation_report or die "Cannot open validation report file '$validation_report': $!\n";
+            print $vfh $validation_output;
+            close $vfh;
+          } else {
+            print $validation_output;
+          }
         }
-    } else {
+      } else {
         $list_stats{$source} = {
-            domains     => $hashes{$source}{domains} || 0,
-            error       => 0,
-            time        => 0,
-            skipped     => 1,
-            status      => 'Skipped',
-            file_size   => $hashes{$source}{file_size} || 0,
-            file_path   => $url_to_filename{$source}{filename} ? "$category/" . $url_to_filename{$source}{filename} : 'N/A',
-            last_updated => $hashes{$source}{last_checked} || strftime("%Y-%m-%d", gmtime),
-            license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
+          domains     => $hashes{$source}{domains} || 0,
+          error       => 0,
+          time        => 0,
+          skipped     => 1,
+          status      => 'Skipped',
+          file_size   => $hashes{$source}{file_size} || 0,
+          file_path   => $url_to_filename{$source}{filename} ? "$category/" . $url_to_filename{$source}{filename} : 'N/A',
+          last_updated => $hashes{$source}{last_checked} || strftime("%Y-%m-%d", gmtime),
+          license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
         };
         $skipped++;
-    }
+      }
 
     $total_domains += $entry_count;
 }

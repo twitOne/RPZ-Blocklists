@@ -10,12 +10,12 @@ on:
   workflow_dispatch:
 
 env:
-  RPZ_DIRS: ads malware misc phishing social tracking # Supported categories, add here new categroies if needed
+  RPZ_DIRS: ads malware misc phishing social tracking # Supported categories, add here new categories if needed
 
 jobs:
   update-rpz:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -48,9 +48,9 @@ jobs:
 
       - name: Install Perl dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y bind9-utils
-          cpanm --installdeps --notest .
+          cpanm --installdeps --notest ./tools
+        env:
+          PERL5LIB: ${{ github.workspace }}/local/lib/perl5:${{ github.workspace }}/local/lib/perl5/x86_64-linux
 
       - name: Generate RPZ files
         id: generate-rpz
@@ -140,7 +140,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add ads/ malware/ misc/ phishing/ social/ tracking/ tools/logs/ SOURCES.md tools/source-hashes.csv
+          git add ads/ malware/ misc/ phishing/ social/ tracking/ tools/logs/ tools/source-hashes.csv SOURCES.md
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

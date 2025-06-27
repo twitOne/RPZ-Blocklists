@@ -498,8 +498,8 @@ close $hfh;
 # Generate SOURCES.md
 open my $md_fh, '>:encoding(utf8)', 'SOURCES.md' or die "Cannot open SOURCES.md: $!\n";
 print $md_fh "# Blocklist Sources Overview\n\n";
-print $md_fh "| Source URL | Last Updated | Category | Entries | Size | License | File Path | Status |\n";
-print $md_fh "|------------|--------------|----------|---------|------|---------|-----------|--------|\n";
+print $md_fh "| Source URL | Last Updated | Category | Entries | Size     | License | File Path | Status |\n";
+print $md_fh "|------------|--------------|----------|---------|----------|---------|-----------|--------|\n";
 foreach my $entry (@categorized_sources) {
     my $url = $entry->{url};
     my $category = $entry->{category};

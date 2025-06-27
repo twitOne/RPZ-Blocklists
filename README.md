@@ -54,7 +54,6 @@ PZ-Blocklists/
 ├── CONTRIBUTING.md             # Contribution guidelines
 ├── git-guide.md                # Git workflow guide
 └── SOURCES.md                  # Auto-generated source overview
-└── README.md
 ```
 
 ## How to Use
@@ -62,7 +61,7 @@ PZ-Blocklists/
 Edit Blocklist Sources:
 
 - Edit tools/urllist.txt to add or remove sources in <category>,<url> format (e.g., ads,https://example.org/hosts.txt).
-- Map sources to custom filenames and licenses in tools/list-mappings.csv (format: <url>,<category>,<filename>,<comments>).
+- Map sources to custom filenames and licenses in tools/list-mappings.csv (format: `<url>,<category>,<filename>,<comments>`).
 - Add new categories to RPZ_DIRS in .github/workflows/update-rpz.yml.
 
 - Categories determine the output subdirectory, which can be extended under `update-rpz.yml` . search for 
@@ -177,7 +176,7 @@ Feel free to open an issue or pull request.
 
 ## Licenses
 
-Each RPZ file includes its license information in the header, sourced from [tools/list-mappings.csv](tools/list-mappings.csv). Note that malware_kadhosts.rpz is licensed under CC BY-SA 4.0 as required by KADhosts. The conversion script (blocklist2rpz-multi.pl) is licensed under GPLv3 (see [tools/LICENSE](tools/LICENSE)).
+Each RPZ file includes its license information in the header, sourced from [tools/list-mappings.csv](tools/list-mappings.csv). The conversion script (blocklist2rpz-multi.pl) is licensed under GPLv3 (see [tools/LICENSE](tools/LICENSE)).
 
 ## Special Thanks
 

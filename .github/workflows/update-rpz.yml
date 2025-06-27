@@ -42,7 +42,7 @@ jobs:
       - name: Cache CPAN modules
         uses: actions/cache@v4
         with:
-          ~/work/RPZ-Blocklists/RPZ-Blocklists/local/lib/perl5
+          path: ~/work/RPZ-Blocklists/RPZ-Blocklists/local/lib/perl5
           key: ${{ runner.os }}-cpan-${{ hashFiles('tools/cpanfile') }}
           restore-keys: ${{ runner.os }}-cpan-
 

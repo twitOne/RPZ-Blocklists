@@ -42,7 +42,6 @@ misc,https://small.oisd.nl
 misc,https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts
 misc,https://raw.githubusercontent.com/StevenBlack/hosts/master/data/yoyo.org/hosts
 
-phishing,https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/phishing.txt
 phishing,https://urlhaus.abuse.ch/downloads/hostfile/
 
 social,https://raw.githubusercontent.com/anudeepND/blacklist/master/facebook.txt

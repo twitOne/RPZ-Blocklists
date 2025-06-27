@@ -42,7 +42,6 @@ https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/genera
 https://raw.githubusercontent.com/StevenBlack/hosts/master/data/yoyo.org/hosts,misc,misc_stevenblack_yoyo.rpz,"License: MIT License (https://github.com/StevenBlack/hosts/blob/master/LICENSE); Source: StevenBlack (https://github.com/StevenBlack/hosts)"
 https://small.oisd.nl,misc,misc_oisd_small_list.rpz,"License: GNU GPL v3.0 (https://github.com/sjhgvr/oisd/blob/main/LICENSE); Source: OISD (https://oisd.nl/)"
 
-https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/phishing.txt,phishing,phishing_hagezi.rpz,"License: GNU GPL v3.0 (https://github.com/hagezi/dns-blocklists/blob/main/LICENSE); Source: Hagezi DNS Blocklists (https://github.com/hagezi/dns-blocklists)"
 https://urlhaus.abuse.ch/downloads/hostfile/,phishing,phishing_urlhaus.rpz,"License: None specified; Source: URLhaus by abuse.ch (https://urlhaus.abuse.ch/); Note: Free for non-commercial security use per Terms of Use (https://abuse.ch/terms-of-use/). Contact support@abuse.ch for clarification."
 
 https://raw.githubusercontent.com/anudeepND/blacklist/master/facebook.txt,social,social_anudeep_facebook.rpz,"License: MIT License (https://github.com/anudeepND/blacklist/blob/master/LICENSE); Source: AnudeepND (https://github.com/anudeepND/blacklist)"

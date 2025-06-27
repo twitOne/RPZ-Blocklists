@@ -140,7 +140,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add ads/ malware/ misc/ phishing/ social/ tracking/ tools/logs/ tools/source-hashes.csv SOURCES.md
+          git add ads/ malware/ misc/ phishing/ social/ tracking/ tools/source-hashes.csv SOURCES.md
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

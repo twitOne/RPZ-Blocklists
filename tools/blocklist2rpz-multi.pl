@@ -368,9 +368,15 @@ foreach my $entry (@categorized_sources) {
         # Check if output file exists and compare hash
         log_message('DEBUG', "Checking if output file exists: $output_file") if $debug_level >= 2;
         if (-f $output_file) {
-            my $existing_content = read_file($output_file, binmode => ':encoding(UTF-8)') || '';
-            my $existing_hash = sha256_hex($existing_content);
-            my $new_content_hash = sha256_hex($rpz_data);
+    my $existing_content = read_file($output_file, binmode => ':raw') || ''; # Zeile 371
+    my $existing_hash = sha256_hex($existing_content); # Zeile 372
+    my $encoded_rpz_data = Encode::encode('UTF-8', $rpz_data, Encode::FB_QUIET); # Zeile 373
+    my $new_content_hash = sha256_hex($encoded_rpz_data); # Zeile 373
+        if (-f $output_file) {
+            my $existing_content = read_file($output_file, binmode => ':raw') || ''; # Zeile 371
+            my $existing_hash = sha256_hex($existing_content); # Zeile 372
+            my $encoded_rpz_data = Encode::encode('UTF-8', $rpz_data, Encode::FB_QUIET); # Zeile 373
+            my $new_content_hash = sha256_hex($encoded_rpz_data); # Zeile 373
             if ($existing_hash eq $new_content_hash) {
                 log_message('INFO', "Output file $output_file unchanged, skipping write");
                 $skip_update = 1;
@@ -383,7 +389,8 @@ foreach my $entry (@categorized_sources) {
             }
         }
         unless ($skip_update) {
-            open my $fh, '>:encoding(UTF-8)', $output_file or die "Cannot open $output_file: $!";
+            $rpz_data =~ s/\x{FEFF}//g; # Entferne BOM
+            open my $fh, '>:raw', $output_file or die "Cannot open $output_file: $!"; # Zeile 374
             print $fh $rpz_data;
             close $fh;
             $file_size = (-s $output_file) / 1024;

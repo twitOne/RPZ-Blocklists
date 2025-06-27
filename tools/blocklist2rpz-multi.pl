@@ -136,6 +136,21 @@ sub log_message {
     print "$level: $message\n"; # Only output to STDOUT
 }
 
+# Format file size with appropriate unit
+sub format_file_size {
+    my ($size_kb) = @_;
+    my $size_bytes = $size_kb * 1024;
+    if ($size_bytes < 1024) {
+        return sprintf("%.0f B", $size_bytes);
+    } elsif ($size_bytes < 1024 * 1024) {
+        return sprintf("%.1f KB", $size_bytes / 1024);
+    } elsif ($size_bytes < 1024 * 1024 * 1024) {
+        return sprintf("%.1f MB", $size_bytes / (1024 * 1024));
+    } else {
+        return sprintf("%.1f GB", $size_bytes / (1024 * 1024 * 1024));
+    }
+}
+
 # Open error log file if requested
 my $err_fh;
 if ($error_log) {
@@ -483,8 +498,8 @@ close $hfh;
 # Generate SOURCES.md
 open my $md_fh, '>:encoding(utf8)', 'SOURCES.md' or die "Cannot open SOURCES.md: $!\n";
 print $md_fh "# Blocklist Sources Overview\n\n";
-print $md_fh "| Source URL | Last Updated | Category | Entries | Size (KB) | License | File Path | Status |\n";
-print $md_fh "|------------|--------------|----------|---------|-----------|---------|-----------|--------|\n";
+print $md_fh "| Source URL | Last Updated | Category | Entries | Size | License | File Path | Status |\n";
+print $md_fh "|------------|--------------|----------|---------|------|---------|-----------|--------|\n";
 foreach my $entry (@categorized_sources) {
     my $url = $entry->{url};
     my $category = $entry->{category};
@@ -497,13 +512,13 @@ foreach my $entry (@categorized_sources) {
         file_path   => $url_to_filename{$url}{filename} ? "$category/" . $url_to_filename{$url}{filename} : 'N/A',
     };
     my $status = $stats->{status};
-    if ($hashes{$url}{last_checked}) {
+    if ($hashes{$url}{last_checked} && $stats->{last_updated} ne 'Unknown') {
         my $last_updated = Time::Piece->strptime($hashes{$url}{last_checked}, "%Y-%m-%dT%H:%M:%SZ");
         if ((gmtime() - $last_updated) > 30 * 86400) {
             $status = 'Outdated';
         }
     }
-    print $md_fh "| $url | $stats->{last_updated} | $category | $stats->{domains} | " . sprintf("%.1f", $stats->{file_size}) . " | $stats->{license} | $stats->{file_path} | $status |\n";
+    print $md_fh "| $url | $stats->{last_updated} | $category | $stats->{domains} | " . format_file_size($stats->{file_size}) . " | $stats->{license} | $stats->{file_path} | $status |\n";
 }
 close $md_fh;
 

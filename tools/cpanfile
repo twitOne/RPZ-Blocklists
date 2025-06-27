@@ -1,0 +1,7 @@
+requires 'LWP::UserAgent';
+requires 'URI';
+requires 'Text::CSV';
+requires 'Digest::SHA';
+requires 'File::Slurp';
+requires 'Time::Piece';
+requires 'Encode';

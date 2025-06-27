@@ -2,98 +2,157 @@ name: Update RPZ Blocklists
 
 on:
   schedule:
-    - cron: '0 * * * *' # Run hourly
-  workflow_dispatch: # Allow manual trigger
+    - cron: '0 * * * *' # Runs every hour
+  push:
+    branches:
+      - main
+      - feature/hash-checking
+  workflow_dispatch:
 
 env:
-  RPZ_DIRS: ads malware phishing tracking misc social # Add here new categories
+  RPZ_DIRS: ads malware misc phishing social tracking # Supported categories, add here new categroies if needed
 
 jobs:
   update-rpz:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
-      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      # Step 2: Set up Perl
+      - name: Pre-check input files
+        run: |
+          if [ ! -f tools/urllist.txt ]; then
+            echo "Error: tools/urllist.txt not found!"
+            exit 1
+          fi
+          if [ ! -f tools/list-mappings.csv ]; then
+            echo "Error: tools/list-mappings.csv not found!"
+            exit 1
+          fi
+
       - name: Set up Perl
         uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: '5.36'
-          install-modules: |
-            LWP::UserAgent
-            LWP::Protocol::https
-            IO::Socket::SSL
-            Text::CSV
-            JSON
-            XML::Simple
 
-      # Step 3: Cache CPAN modules
       - name: Cache CPAN modules
         uses: actions/cache@v4
         with:
-          path: |
-            ~/perl5
-            /home/runner/work/RPZ-Blocklists/RPZ-Blocklists/local/lib/perl5
-            /home/runner/work/RPZ-Blocklists/RPZ-Blocklists/local/lib/perl5/x86_64-linux
-          key: ${{ runner.os }}-cpan-${{ hashFiles('tools/blocklist2rpz-multi.pl', 'tools/urllist.txt', 'tools/list-mappings.csv') }}
-          restore-keys: |
-            ${{ runner.os }}-cpan-
+          path: ~/.cpan
+          key: ${{ runner.os }}-cpan-${{ hashFiles('tools/cpanfile') }}
+          restore-keys: ${{ runner.os }}-cpan-
 
-      # Step 4: Generate RPZ blocklists
-      - name: Generate RPZ blocklists
+      - name: Install Perl dependencies
         run: |
-          cd "$GITHUB_WORKSPACE"
-          echo "Current directory: $(pwd)"
-          echo "Workspace: $GITHUB_WORKSPACE"
+          sudo apt-get update
+          sudo apt-get install -y bind9-utils
+          cpanm --installdeps --notest .
+
+      - name: Generate RPZ files
+        id: generate-rpz
+        run: |
+          export PERLIO=:unix
           mkdir -p tools/logs
-          echo "Logs directory content before run:"
-          ls -la tools/logs
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          echo "Will write to: tools/logs/error_${TIMESTAMP}.log"
+          rm -f tools/logs/*.log tools/logs/*.txt
           perl tools/blocklist2rpz-multi.pl \
             -w \
             -d . \
             -l tools/urllist.txt \
             -m tools/list-mappings.csv \
-            -e tools/logs/error_${TIMESTAMP}.log \
-            -s tools/logs/status_${TIMESTAMP}.txt \
+            -e tools/logs/error.log \
+            -s tools/logs/status.txt \
             --validate \
-            --validation-report tools/logs/validation_${TIMESTAMP}.txt
+            --validation-report tools/logs/validation.txt \
+            --debug-level=1
 
-      # Step 5: Debug logs directory before upload
-      - name: Debug logs directory before upload
+      - name: Check for outdated sources
         run: |
-          echo "Logs directory content before upload:"
-          ls -la $GITHUB_WORKSPACE/tools/logs/
+          perl -MTime::Piece -e '
+            use strict;
+            use Text::CSV;
+            my $csv = Text::CSV->new({ binary => 1, sep_char => "," });
+            open my $fh, "<:encoding(utf8)", "tools/source-hashes.csv" or die $!;
+            $csv->getline($fh); # Skip header
+            my @outdated;
+            while (my $row = $csv->getline($fh)) {
+              my ($url, $hash, $etag, $last_modified, $last_checked, $failed_attempts) = @$row;
+              next unless $last_checked;
+              my $last_updated = Time::Piece->strptime($last_checked, "%Y-%m-%dT%H:%M:%SZ");
+              if ((gmtime() - $last_updated) > 30 * 86400) {
+                push @outdated, [$url, $last_checked];
+              }
+            }
+            close $fh;
+            if (@outdated) {
+              print "Outdated sources:\n";
+              print join("\n", map { "Source: $_->[0], Last checked: $_->[1]" } @outdated) . "\n";
+              open my $out_fh, ">", "tools/logs/outdated.txt" or die $!;
+              print $out_fh join("\n", map { "Source: $_->[0], Last checked: $_->[1]" } @outdated) . "\n";
+              close $out_fh;
+            }
+          '
 
-      # Step 6: Upload logs as artifact
-      - name: Upload logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: rpz-logs
-          path: tools/logs/*.*
-          retention-days: 7
-          if-no-files-found: warn
-          include-hidden-files: true
-
-      # Step 7: Clean up old logs
-      - name: Clean up old logs
-        run: |
-          find $GITHUB_WORKSPACE/tools/logs/ -type f -mtime +7 -delete
+      - name: Create issue for outdated sources
         if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('tools/logs/outdated.txt')) {
+              const content = fs.readFileSync('tools/logs/outdated.txt', 'utf8');
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Outdated Sources Detected',
+                body: `The following sources are outdated (not updated in the last 30 days):\n\n${content}`,
+              });
+            }
 
-      # Step 8: Commit and push changes
+      - name: Create issue for failed sources
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('tools/logs/error.log')) {
+              const content = fs.readFileSync('tools/logs/error.log', 'utf8');
+              if (content.includes('Reset hash') || content.includes('failed for')) {
+                const sources = content.match(/(?:Reset hash for|HEAD request failed for|Could not fetch) (.+?)(?=(?:\n|$| after|:\s))/g) || [];
+                if (sources.length > 0) {
+                  const failedSources = sources.map(s => s.replace(/^(Reset hash for|HEAD request failed for|Could not fetch) /, '')).join('\n');
+                  await github.rest.issues.create({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    title: 'Failed Sources Detected',
+                    body: `The following sources failed or had their hashes reset:\n\n${failedSources}\n\nFull log:\n${content}`,
+                  });
+                }
+              }
+            }
+
       - name: Commit and push changes
         run: |
-          cd "$GITHUB_WORKSPACE"
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add .
-          git commit -m "Automated update: RPZ blocklists ($(date -u))" || echo "No changes to commit"
-          git pull --rebase origin main
-          git push origin main
+          git add ads/ malware/ misc/ phishing/ social/ tracking/ tools/logs/ SOURCES.md tools/source-hashes.csv
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Epic update: Enhanced blocklist2rpz-multi.pl with ETag/Hash change detection, SOURCES.md generation, debug-level control, robust error handling, and sorted urllist/list-mappings for ultimate clarity! ($(date -u))"
+            git pull --rebase origin ${{ github.ref_name }}
+            git push origin ${{ github.ref_name }}
+          fi
+
+      - name: Upload logs as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: tools/logs/
+          retention-days: 7

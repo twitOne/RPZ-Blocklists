@@ -1,5 +1,8 @@
 # Ignore all log files in tools/logs/
 tools/logs/
+local/
+tools/cache/
+output/
 
 # Ignore backup or temporary files
 *.bak
@@ -19,6 +22,3 @@ Thumbs.db
 # Ignore editor/project files
 .vscode/
 .idea/
-
-# Ignore Perl modules
-local/

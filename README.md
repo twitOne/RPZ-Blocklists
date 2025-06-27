@@ -1,4 +1,12 @@
 # RPZ-Blocklists
+```
+   ____  ____  __________ 
+  |  _ \|  _ \|___  /  _ \ 
+  | |_) | |_) |  / /| |_) | 
+  |  _ <|  _ <  / / |  _ < 
+  |_| \_\_| \_\/___|_| \_\ 
+```
+
 
 ![Build Status](https://github.com/twitOne/RPZ-Blocklists/actions/workflows/update-rpz.yml/badge.svg)
 ![Contributors](https://img.shields.io/github/contributors/twitOne/RPZ-Blocklists)

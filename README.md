@@ -7,53 +7,89 @@
 
 Multi-Source RPZ Blocklists for DNS Filtering (automated conversion and updates)
 
-This repository provides categorized, automatically converted Response Policy Zone (RPZ) blocklists from various free sources. The goal is to offer an easy-to-use, regularly updated collection for DNS filtering with Unbound or any RPZ-compatible resolver.
+This repository provides categorized, automatically updated Response Policy Zone (RPZ) blocklists from various free sources. The goal is to offer an easy-to-use, high-quality collection for DNS filtering with Unbound or any RPZ-compatible resolver, enhanced with robust change detection and validation.
+
+## Features
+
+- **Automated Updates**: Hourly updates via GitHub Actions, fetching and converting blocklists from `tools/urllist.txt`.
+- **Categorized Blocklists**: Organized into `ads/`, `malware/`, `phishing/`, `social/`, `tracking/`, and `misc/` for easy integration.
+- **Change Detection**: Uses ETag, Last-Modified, and SHA256 hash checks to skip unchanged sources, reducing unnecessary downloads.
+- **Validation**: Ensures RPZ files are syntactically correct and contain valid domains.
+- **SOURCES.md**: Auto-generated overview of all sources with stats (entries, size, last updated, status).
+- **Robust Error Handling**: Logs failed or unreachable sources to `tools/logs/error.log` and creates GitHub issues for outdated/failed sources.
+- **Customizable**: Supports wildcards (`*.<domain>`), custom filenames via `tools/list-mappings.csv`, and debug levels.
+- **Performance**: Efficient processing with cached Perl modules and retry logic for failed sources.
+- **License Clarity**: Includes license information in RPZ file headers, sourced from `tools/list-mappings.csv`.
 
 ## Repository Structure
 
 ```text
-RPZ-Blocklists/
-├── ads/         # RPZ files for ad and tracker domains
-├── malware/     # RPZ files for malware and malicious domains
-├── phishing/    # RPZ files for phishing and fraud domains
-├── social/      # RPZ files for social media domains
-├── tracking/    # RPZ files for tracking and spyware domains
-├── misc/        # RPZ files for mixed or uncategorized sources
+PZ-Blocklists/
+├── ads/                        # RPZ files for ad and tracker domains
+├── malware/                    # RPZ files for malware and malicious domains
+├── phishing/                   # RPZ files for phishing and fraud domains
+├── social/                     # RPZ files for social media domains
+├── tracking/                   # RPZ files for tracking and spyware domains
+├── misc/                       # RPZ files for mixed or uncategorized sources
 ├── tools/
-│   ├── urllist.txt             # List of all blocklist sources (<category>,<url> per line)
-│   ├── list-mappings.csv       # Mapping of sources to categories and licenses
 │   ├── blocklist2rpz-multi.pl  # Perl script to convert and validate blocklists
-│   ├── LICENSE                 # GPLv3 license for the conversion script
-│   └── logs/                   # (Git-ignored) log files for errors, status, validation
+│   ├── cpanfile                # Perl module dependencies
+│   ├── list-mappings.csv       # Maps URLs to categories, filenames, and licenses
+│   ├── source-hashes.csv       # Tracks source hashes, ETags, and stats
+│   ├── urllist.txt             # List of blocklist sources (<category>,<url>)
+│   ├── logs/                   # (Git-ignored) error, status, and validation logs
+│   └── LICENSE                 # GPLv3 license for the conversion script
+├── .github/workflows/
+│   └── update-rpz.yml          # GitHub Actions workflow for hourly updates
+├── .gitignore                  # Ignores logs and temporary files
+├── README.md                   # Project documentation
+├── CONTRIBUTING.md             # Contribution guidelines
+├── git-guide.md                # Git workflow guide
+└── SOURCES.md                  # Auto-generated source overview
 └── README.md
 ```
 
 ## How to Use
 
-- Edit Blocklist Sources:
-- Edit tools/urllist.txt to add or remove blocklist sources.
-- The file must use the format <category>,<url> (e.g. ads,https://example.org/hosts.txt).
-- Categories determine the output subdirectory.
-- Map sources to categories in tools/list-mappings.csv.
+Edit Blocklist Sources:
+
+- Edit tools/urllist.txt to add or remove sources in <category>,<url> format (e.g., ads,https://example.org/hosts.txt).
+- Map sources to custom filenames and licenses in tools/list-mappings.csv (format: <url>,<category>,<filename>,<comments>).
+- Add new categories to RPZ_DIRS in .github/workflows/update-rpz.yml.
+
+- Categories determine the output subdirectory, which can be extended under `update-rpz.yml` . search for 
+```bash
+env:
+  RPZ_DIRS: ads malware misc phishing social tracking # Supported categories, add here new categories if needed
+```
 - Add new categories under `RPZ_DIRS:` in update-rpz.yml
 
 Convert Lists to RPZ:
 Use the Perl script to fetch, convert, and validate blocklists. Example:
 
 ```bash
-perl tools/blocklist2rpz-multi.pl -w -d ./ -l tools/urllist.txt \
-  -e tools/logs/error_$(date +%Y%m%d_%H%M%S).log \
-  -s tools/logs/status_$(date +%Y%m%d_%H%M%S).txt \
-  --validate --validation-report tools/logs/validation_$(date +%Y%m%d_%H%M%S).txt
+perl tools/blocklist2rpz-multi.pl \
+  -w \
+  -d . \
+  -l tools/urllist.txt \
+  -m tools/list-mappings.csv \
+  -e tools/logs/error.log \
+  -s tools/logs/status.txt \
+  --validate \
+  --validation-report tools/logs/validation.txt \
+  --debug-level=1
 ```
 
-Explanation:
--  -w enables wildcard entries.
--  -d sets the output base directory (here: current directory, subfolders by category).
--  -l specifies the source list.
--  --validate checks the generated RPZ files.
--  --validation-report writes a validation summary.
--  -e and -s write error and status logs (recommended: use tools/logs/).
+Options:
+-  `-w`: Enable wildcard entries (*.<domain> CNAME .).
+-  `-d <dir>`: Output base directory (subfolders created per category).
+-  `-l <file>`: Source list (urllist.txt).
+-  `-m <file>`: Mapping file (list-mappings.csv).
+-  `-e <file>`: Error log file.
+-  `-s <file>`: Status report file.
+-  `--validate`: Validate RPZ files for syntax and domain errors.
+-  `--validation-report <file>`: Write validation report.
+-  `--debug-level <0|1|2>`: Debug level (0=none, 1=info, 2=full).
 -  Run `perl tools/blocklist2rpz-multi.pl --help` for more options.
 
 ## Integrate with Unbound (or similar):
@@ -63,7 +99,7 @@ The generated .rpz files can be included in your DNS resolver configuration with
 rpz:
     name:                   twitOne.rpz
     zonefile:               /etc/unbound/zonefiles/twitOne.rpz
-    url:                    https://raw.githubusercontent.com/twitOne/RPZ-Blocklists/refs/heads/main/ads/ads_example.rpz
+    url:                    https://raw.githubusercontent.com/twitOne/RPZ-Blocklists/main/ads/ads_example.rpz
     rpz-action-override:    nxdomain
     rpz-log:                yes
     rpz-log-name:           twitOne

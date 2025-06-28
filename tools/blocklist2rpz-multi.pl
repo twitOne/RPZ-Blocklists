@@ -463,76 +463,81 @@ foreach my $entry (@categorized_sources) {
 
 # Write status file
 if ($status_report) {
-	open my $status_fh, '>:encoding(UTF-8)', $status_report or die "Cannot open $status_report: $!\n";
-	$total_time = time - $total_time;
-	printf $status_fh "Processed %d sources: %d OK, %d Skipped, %d Failed, %d total domains in %.2f seconds\n", scalar(@categorized_sources), $ok, $skipped, $failed, $total_domains, $total_time;
-	printf $status_fh "HEAD requests: %d, Full downloads: %d\n\n", $head_requests, $full_downloads;
-	print $status_fh "=" x 80 . "\n";
-	print $status_fh sprintf("%-50s %-11s %-14s %s\n", "List", "Domains", "Time (s)", "Status");
-	print $status_fh "-" x 80 . "\n";
-	foreach my $source (sort keys %list_stats) {
-		my $list_name = $url_to_filename{$source}{filename} || basename(URI->new($source)->path) || URI->new($source)->host;
-		printf $status_fh "%-50s %-11d %-14.2f %s\n", $list_name, $list_stats{$source}{domains}, $list_stats{$source}{time}, $list_stats{$source}{status};
-	}
-	print $status_fh "\nFailed sources:\n" if $failed;
-	foreach my $source (sort keys %list_stats) {
-		print $status_fh "$source\n" if $list_stats{$source}{status} eq 'Not Reachable';
-	}
-	close $status_fh;
+    open my $status_fh, '>:encoding(UTF-8)', $status_report or die "Cannot open $status_report: $!\n";
+    $total_time = time - $total_time;
+    printf $status_fh "Processed %d sources: %d OK, %d Skipped, %d Failed, %d total domains in %.2f seconds\n", scalar(@categorized_sources), $ok, $skipped, $failed, $total_domains, $total_time;
+    printf $status_fh "HEAD requests: %d, Full downloads: %d\n\n", $head_requests, $full_downloads;
+    print $status_fh "=" x 80 . "\n";
+    print $status_fh sprintf("%-50s %-11s %-14s %s\n", "List", "Domains", "Time (s)", "Status");
+    print $status_fh "-" x 80 . "\n";
+    foreach my $source (sort keys %list_stats) {
+        my $list_name = $url_to_filename{$source}{filename} || basename(URI->new($source)->path) || URI->new($source)->host;
+        printf $status_fh "%-50s %-11d %-14.2f %s\n", $list_name, $list_stats{$source}{domains}, $list_stats{$source}{time}, $list_stats{$source}{status};
+    }
+    print $status_fh "\nFailed sources:\n" if $failed;
+    foreach my $source (sort keys %list_stats) {
+        print $status_fh "$source\n" if $list_stats{$source}{status} eq 'Not Reachable';
+    }
+    # Write status summary
+    my %status_counts;
+    $status_counts{$list_stats{$_}{status}}++ for keys %list_stats;
+    print $status_fh "\nStatus Summary:\n";
+    printf $status_fh "%s: %d\n", $_, $status_counts{$_} || 0 for qw(Updated No Updates Not Reachable Outdated);
+    close $status_fh;
 }
 
 # Save updated hashes
 my $csv = Text::CSV->new({ binary => 1, sep_char => ',', auto_diag => 1 });
 open my $hfh, '>:encoding(utf8)', $hash_file or die "Can't open hash file '$hash_file': $!\n";
-$csv->print($hfh, ['URL', 'Hash', 'ETag', 'Last-Modified', 'Last-Checked', 'Failed-Attempts', 'Domains', 'File-Size-KB']);
+$csv->print($hfh, ['URL', 'Hash', 'ETag', 'Last-Modified', 'Last-Checked', 'Failed-Attempts', 'Domains', 'File-Size']);
 print $hfh "\n";
 foreach my $url (sort keys %hashes) {
-	$csv->print($hfh, [
-		$url,
-		$hashes{$url}{hash},
-		$hashes{$url}{etag},
-		$hashes{$url}{last_modified},
-		$hashes{$url}{last_checked},
-		$hashes{$url}{failed_attempts},
-		$hashes{$url}{domains} || 0,
-		$hashes{$url}{file_size} || 0,
-	]);
-	print $hfh "\n";
+    $csv->print($hfh, [
+        $url,
+        $hashes{$url}{hash},
+        $hashes{$url}{etag},
+        $hashes{$url}{last_modified},
+        $hashes{$url}{last_checked},
+        $hashes{$url}{failed_attempts},
+        $hashes{$url}{domains} || 0,
+        $hashes{$url}{file_size} || 0,
+    ]);
+    print $hfh "\n";
 }
 close $hfh;
 
 # Generate SOURCES.md
 open my $md_fh, '>:encoding(utf8)', 'SOURCES.md' or die "Cannot open SOURCES.md: $!\n";
 print $md_fh "# Blocklist Sources Overview\n\n";
-print $md_fh "| Source URL | Last Updated | Category | Entries | Size     | License | File Path | Status |\n";
-print $md_fh "|------------|--------------|----------|---------|----------|---------|-----------|--------|\n";
-print $md_fh "\n";
-print $md_fh "## Status Definitions\n";
+print $md_fh "| RPZ File URL | Last Updated | Category | Entries | Size | License | File Path | Status |\n";
+print $md_fh "|--------------|--------------|----------|---------|----------|---------|-----------|--------|\n";
+foreach my $entry (@categorized_sources) {
+    my $url = $entry->{url};
+    my $category = $entry->{category};
+    my $stats = $list_stats{$url} || {
+        domains     => $hashes{$url}{domains} || 0,
+        file_size   => $hashes{$url}{file_size} || 0,
+        status      => 'Not Processed',
+        last_updated => $hashes{$url}{last_checked} || 'Unknown',
+        license     => $url_to_filename{$url}{comments} ? ($url_to_filename{$url}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
+        file_path   => $url_to_filename{$url}{filename} ? "$category/" . $url_to_filename{$url}{filename} : 'N/A',
+    };
+    my $status = $stats->{status};
+    if ($hashes{$url}{last_checked} && $stats->{last_updated} ne 'Unknown') {
+        my $last_updated = Time::Piece->strptime($hashes{$url}{last_checked}, "%Y-%m-%dT%H:%M:%SZ");
+        if ((gmtime() - $last_updated) > 30 * 86400) {
+            $status = 'Outdated';
+        }
+    }
+    my $rpz_url = $stats->{file_path} eq 'N/A' ? 'N/A' : "[$stats->{file_path}](https://raw.githubusercontent.com/twitOne/RPZ-Blocklists/main/$stats->{file_path})";
+    my $license = $stats->{license} =~ /http/ ? "[$stats->{license}]($stats->{license})" : $stats->{license};
+    print $md_fh "| $rpz_url | $stats->{last_updated} | $category | $stats->{domains} | " . format_file_size($stats->{file_size}) . " | $license | $stats->{file_path} | $status |\n";
+}
+print $md_fh "\n## Status Definitions\n";
 print $md_fh "- **Updated**: Source was fetched and RPZ file was updated with new content.\n";
 print $md_fh "- **No Updates**: Source was checked but no changes detected (ETag, Last-Modified, or hash match).\n";
 print $md_fh "- **Not Reachable**: Source could not be fetched (HTTP error or timeout).\n";
 print $md_fh "- **Outdated**: Source not checked/updated in over 30 days.\n";
-print $md_fh "\n";
-foreach my $entry (@categorized_sources) {
-	my $url = $entry->{url};
-	my $category = $entry->{category};
-	my $stats = $list_stats{$url} || {
-		domains     => $hashes{$url}{domains} || 0,
-		file_size   => $hashes{$url}{file_size} || 0,
-		status      => 'Not Processed',
-		last_updated => $hashes{$url}{last_checked} || 'Unknown',
-		license     => $url_to_filename{$url}{comments} ? ($url_to_filename{$url}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
-		file_path   => $url_to_filename{$url}{filename} ? "$category/" . $url_to_filename{$url}{filename} : 'N/A',
-	};
-	my $status = $stats->{status};
-	if ($hashes{$url}{last_checked} && $stats->{last_updated} ne 'Unknown') {
-		my $last_updated = Time::Piece->strptime($hashes{$url}{last_checked}, "%Y-%m-%dT%H:%M:%SZ");
-		if ((gmtime() - $last_updated) > 30 * 86400) {
-			$status = 'Outdated';
-		}
-	}
-	print $md_fh "| $url | $stats->{last_updated} | $category | $stats->{domains} | " . format_file_size($stats->{file_size}) . " | $stats->{license} | $stats->{file_path} | $status |\n";
-}
 close $md_fh;
 
 # Close error log

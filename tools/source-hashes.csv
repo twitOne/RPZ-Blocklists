@@ -1,11 +1,11 @@
-URL,Hash,ETag,Last-Modified,Last-Checked,Failed-Attempts,Domains,File-Size-KB
-https://big.oisd.nl/,91a07121c9514d56c70b1b541c2a6f232e0ef98caeeaec8fff18bf3ec4301515,"""942fda2d""","Sat, 28 Jun 2025 03:19:42 GMT",2025-06-28T03:49:42Z,0,191222,10691.2841796875
+URL,Hash,ETag,Last-Modified,Last-Checked,Failed-Attempts,Domains,File-Size
+https://big.oisd.nl/,e9b34e130bed3fa320c9d1a1c6773cd8aee81d329500626e2cfb52b1b40764a6,"""b1a575ca""","Sat, 28 Jun 2025 05:19:16 GMT",2025-06-28T05:41:28Z,0,191123,10685.9716796875
 https://bitbucket.org/ethanr/dns-blacklists/raw/8575c9f96e5b4a1308f2f12394abd86d0927a4a0/bad_lists/Mandiant_APT1_Report_Appendix_D.txt,3052a65fae7b9de3afc6216d9136edcb815af9f992f435f14780825af4c1ff7c,"""46c2f7472965d6513074c42da1d82a4c""","Wed, 16 Jul 2014 18:16:03 GMT",2025-06-27T16:38:22Z,0,2046,122.2333984375
 https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-malware.txt,a6a38e6a2a2af6eadf5223f6ae70dc5d52b3ee55aa0c28d892e851c0cfee0e63,"""352272094e1599655405e13ca97d0822""",,2025-06-27T16:38:22Z,0,154,8.2080078125
 https://hostfiles.frogeye.fr/firstparty-trackers-hosts.txt,50278db673cdf511a78d392a6eb75a8287670ea36af4973e296503d65b8e7cef,"""685a459a-105e6b""","Tue, 24 Jun 2025 06:28:42 GMT",2025-06-27T16:38:49Z,0,33403,2160.1611328125
 https://lists.cyberhost.uk/malware.txt,02d10197109aa0ea3ef6d2562167e5915d2737b015de1b0448d3cc8027eee9e6,"""b572a3047bf47e2f95723810d905ae8e""","Fri, 27 Jun 2025 16:11:26 GMT",2025-06-27T16:38:22Z,0,15184,877.171875
-https://nsfw-small.oisd.nl,d5715508dc63249d5f312cb9d9cf8c5bf0f889d60847552bce4f439d0cf60888,"""c34c9129""","Sat, 28 Jun 2025 03:26:24 GMT",2025-06-28T03:49:52Z,0,21050,973.49609375
-https://nsfw.oisd.nl,ed670a262254be67237aa2c7c90c59a726b06244dc642275dc957da36dbf6ba6,"""993fa588""","Sat, 28 Jun 2025 03:26:10 GMT",2025-06-28T03:49:46Z,0,413135,22665.4677734375
+https://nsfw-small.oisd.nl,55fe4d726c9d510dc42c9fe9e3f1600c8effb00aa20caeb5b141b33c1267689e,"""ee3203e3""","Sat, 28 Jun 2025 05:26:43 GMT",2025-06-28T05:41:36Z,0,21052,973.6015625
+https://nsfw.oisd.nl,48964da4c334543fec0fc49dd1914cd5b70d93d74fd34513c1748adad17be773,"""6ef0aa91""","Sat, 28 Jun 2025 05:26:28 GMT",2025-06-28T05:41:31Z,0,413173,22667.5380859375
 https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts,12fb9326892173a15104dff49aae802a5634b7b46a2c512e91a29c30539322d0,"""733b1c996a1e0ac41680f41f7126caac8c641114bc4df50b40c5a2f9fef88e60""",,2025-06-27T16:38:48Z,0,917,54.724609375
 https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt,cd9c3b7383e4f94ae4899c8294358ff84619164abd5df46ba66d07ab5fe4d480,"""e02bdaf4c40bba8c1376740ced4801bab8a909f96a9f7b007db07094e2225212""",,2025-06-27T16:38:24Z,0,31148,1760.9716796875
 https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts,c60b7ee16362fa5848bd257a14854b240e793735a2310669f2f889f391a00d70,"""9c443c359200c7d023caff7ec5be8202fd9b7c388b0acd7acc19fe4192090191""",,2025-06-27T16:38:16Z,0,9,1.2275390625
@@ -39,8 +39,8 @@ https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/native.amaz
 https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/native.apple.txt,689a78fa18a57b157def140833ee39d4bf9ce2f93d003576a4e2c5b55dd476ab,"""685bd8be055059aaf2ae65c126e7e0ae4a52612526f63b8f2b1fb18b7613c479""",,2025-06-27T16:38:25Z,0,290,23.6689453125
 https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/native.huawei.txt,e811a7b1518c77a85009ad37f4cbae5aae799c1c454c80ec89642a540453db98,"""e127c32a3508a7d57269227ff10f83464be160b8e1e8ebc3ec6658febdd4b083""",,2025-06-27T16:38:25Z,0,152,15.0283203125
 https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt,bd4346437312f5b9bc8ba15ba4e9c40342bc8db5e0e1d400170b42ed7825db1a,"""cdff4f7d3043f4789209a953ba4c0f7a""","Sat, 01 Feb 2020 02:37:09 GMT",2025-06-27T16:38:20Z,0,2701,133.205078125
-https://small.oisd.nl,24cb2f37caf5e60bca0e79b95b8299857663fa7620e7cad6e730247d437d237f,"""cec46857""","Sat, 28 Jun 2025 03:19:55 GMT",2025-06-28T03:49:54Z,0,43047,2301.74609375
-https://urlhaus.abuse.ch/downloads/hostfile/,2a90e5f5b307a199051ba0af4583ed9ad9dd4d10fa23145dabf1b24bbac75253,"""3bf9-638999ead5fff""","Sat, 28 Jun 2025 03:45:03 GMT",2025-06-28T03:49:57Z,0,516,28.1796875
+https://small.oisd.nl,95e2626ccc8b263652a58fa854f03993c3c0fef2bb0379ecc90c91ede5fba020,"""c0639473""","Sat, 28 Jun 2025 05:19:31 GMT",2025-06-28T05:41:38Z,0,43039,2301.302734375
+https://urlhaus.abuse.ch/downloads/hostfile/,0e7c5cd51719a1117b147768644613adcb8a9d615e41cc598f9287eefbdca8f0,"""3c9d-6389b280fcd13""","Sat, 28 Jun 2025 05:35:03 GMT",2025-06-28T05:41:40Z,0,519,28.48828125
 https://v.firebog.net/hosts/AdguardDNS.txt,9701d102514d6bb0617284ae45b96593d1621c69a5175f6bab47ddaa10a29ddf,"W/""216f18-6388deb085540-gzip""","Fri, 27 Jun 2025 13:47:25 GMT",2025-06-27T16:38:20Z,0,109599,6205.80078125
 https://v.firebog.net/hosts/Admiral.txt,e301fd895be13a02e21d55667fecc35aa21f9afcf8f055d697528c8a9a01aade,"W/""787e-5d0949be88f40-gzip""","Fri, 12 Nov 2021 10:06:13 GMT",2025-06-27T16:38:21Z,0,1762,91.20703125
 https://v.firebog.net/hosts/Easylist.txt,8b2298b7e4ce07d2b997951c07c6c9461c003af81c7000d54dcc0a40d89848b8,"W/""87126-6388df14a8180-gzip""","Fri, 27 Jun 2025 13:49:10 GMT",2025-06-27T16:38:21Z,0,31020,1625.759765625

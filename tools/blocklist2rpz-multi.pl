@@ -463,28 +463,37 @@ foreach my $entry (@categorized_sources) {
 
 # Write status file
 if ($status_report) {
-		open my $status_fh, '>:encoding(UTF-8)', $status_report or die "Cannot open $status_report: $!\n";
-		$total_time = time - $total_time;
-		printf $status_fh "Processed %d sources: %d OK, %d Skipped, %d Failed, %d total domains in %.2f seconds\n", scalar(@categorized_sources), $ok, $skipped, $failed, $total_domains, $total_time;
-		printf $status_fh "HEAD requests: %d, Full downloads: %d\n\n", $head_requests, $full_downloads;
-		print $status_fh "=" x 80 . "\n";
-		print $status_fh sprintf("%-50s %-11s %-14s %s\n", "List", "Domains", "Time (s)", "Status");
-		print $status_fh "-" x 80 . "\n";
-		foreach my $source (sort keys %list_stats) {
-				my $list_name = $url_to_filename{$source}{filename} || basename(URI->new($source)->path) || URI->new($source)->host;
-				printf $status_fh "%-50s %-11d %-14.2f %s\n", $list_name, $list_stats{$source}{domains}, $list_stats{$source}{time}, $list_stats{$source}{status};
-		}
-		print $status_fh "\nFailed sources:\n" if $failed;
-		foreach my $source (sort keys %list_stats) {
-				print $status_fh "$source\n" if $list_stats{$source}{status} eq 'Not Reachable';
-		}
-		# Write status summary
-		my %status_counts;
-		$status_counts{$list_stats{$_}{status}}++ for keys %list_stats;
-		print $status_fh "\nStatus Summary:\n";
-		my @statuses = ('Updated', 'No Updates', 'Not Reachable', 'Outdated');
-		printf $status_fh "%s: %d\n", $_, $status_counts{$_} || 0 for @statuses;
-		close $status_fh;
+    open my $status_fh, '>:encoding(UTF-8)', $status_report or die "Cannot open $status_report: $!\n";
+    $total_time = time - $total_time;
+    printf $status_fh "Processed %d sources: %d OK, %d Skipped, %d Failed, %d total domains in %.2f seconds\n", scalar(@categorized_sources), $ok, $skipped, $failed, $total_domains, $total_time;
+    printf $status_fh "HEAD requests: %d, Full downloads: %d\n\n", $head_requests, $full_downloads;
+    print $status_fh "=" x 80 . "\n";
+    print $status_fh sprintf("%-50s %-11s %-14s %s\n", "List", "Domains", "Time (s)", "Status");
+    print $status_fh "-" x 80 . "\n";
+    foreach my $source (sort keys %list_stats) {
+        my $list_name = $url_to_filename{$source}{filename} || basename(URI->new($source)->path) || URI->new($source)->host;
+        printf $status_fh "%-50s %-11d %-14.2f %s\n", $list_name, $list_stats{$source}{domains}, $list_stats{$source}{time}, $list_stats{$source}{status};
+    }
+    print $status_fh "\nFailed sources:\n" if $failed;
+    foreach my $source (sort keys %list_stats) {
+        print $status_fh "$source\n" if $list_stats{$source}{status} eq 'Not Reachable';
+    }
+    # Write status summary
+    # Explicitly initialize status counts to avoid duplicate lines and ensure robustness
+    my %status_counts = (
+        'Updated' => 0,
+        'No Updates' => 0,
+        'Not Reachable' => 0,
+        'Outdated' => 0,
+    );
+    $status_counts{$list_stats{$_}{status}}++ for keys %list_stats;
+    print $status_fh "\nStatus Summary:\n";
+    print $status_fh "-" x 80 . "\n";
+    for my $status ('Updated', 'No Updates', 'Not Reachable', 'Outdated') {
+        printf $status_fh "%-20s %d\n", $status, $status_counts{$status};
+    }
+    print $status_fh "-" x 80 . "\n";
+    close $status_fh;
 }
 
 # Save updated hashes

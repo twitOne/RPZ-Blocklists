@@ -58,7 +58,11 @@
 #   - source-hashes.csv tracks source changes and is versioned in the repository
 #   - SOURCES.md provides a user-friendly overview of all sources
 #
-# Version: 1.7 - Fixed duplicate file creation, enhanced SOURCES.md with persistent stats
+# Version: 1.7 	- Fixed duplicate file creation, enhanced SOURCES.md with persistent stats
+# Version: 1.8 	- Fixed duplicate `No`/`Updates` lines in `status.txt` Status Summary.
+#				- Added separator lines to Status Summary for better readability.
+#				- Enhanced ETag/Hash change detection and SOURCES.md generation.
+#
 # Author: ummeegge, with community contributions
 # License: GNU General Public License v3.0 (GPLv3)
 ###############################################################################

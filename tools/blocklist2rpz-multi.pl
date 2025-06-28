@@ -109,19 +109,19 @@ if ($help or (!$urllist && !@ARGV)) {
 	print <<USAGE;
 Usage: $0 [options]
 Options:
-  --wildcards, -w             Output wildcard RPZ entries (*.<domain> CNAME .)
-  --output-dir, -d <dir>      Output directory for RPZ files (default: .)
-  --urllist, -l <file>        File with category,url per line (see README)
-  --list-mappings, -m <file>  File with url,category,filename,comments to map URLs to custom RPZ filenames
-  --error-log, -e <file>      Write unreachable or failed sources to this log file
-  --no-soa, -n                Do not output SOA and NS records in the RPZ file
-  --status-report, -s <file>  Write processing summary to this file
-  --validate, -V              Validate all generated RPZ files for syntax and domain errors
-  --validation-report <file>  Write validation report to this file
-  --debug-level <0|1|2>       Debug level: 0=none, 1=info (default), 2=full debug
-  --help, -h                  Show this help message
+	--wildcards, -w             Output wildcard RPZ entries (*.<domain> CNAME .)
+	--output-dir, -d <dir>      Output directory for RPZ files (default: .)
+	--urllist, -l <file>        File with category,url per line (see README)
+	--list-mappings, -m <file>  File with url,category,filename,comments to map URLs to custom RPZ filenames
+	--error-log, -e <file>      Write unreachable or failed sources to this log file
+	--no-soa, -n                Do not output SOA and NS records in the RPZ file
+	--status-report, -s <file>  Write processing summary to this file
+	--validate, -V              Validate all generated RPZ files for syntax and domain errors
+	--validation-report <file>  Write validation report to this file
+	--debug-level <0|1|2>       Debug level: 0=none, 1=info (default), 2=full debug
+	--help, -h                  Show this help message
 Example:
-  perl $0 -w -d . -l tools/urllist.txt -m tools/list-mappings.csv \
+	perl $0 -w -d . -l tools/urllist.txt -m tools/list-mappings.csv \
 	-e tools/logs/error.log -s tools/logs/status.txt \
 	--validate --validation-report tools/logs/validation.txt --debug-level=1
 USAGE
@@ -375,10 +375,10 @@ foreach my $entry (@categorized_sources) {
 	}
 
 	# Convert to RPZ format
-	  my $entry_count = 0;
-	  my $file_path = 'N/A';
-	  my $file_size = 0;
-	  unless ($skip_update) {
+		my $entry_count = 0;
+		my $file_path = 'N/A';
+		my $file_size = 0;
+		unless ($skip_update) {
 		my ($rpz_data, $count) = convert_blocklist_to_rpz($content, $source, $wildcards, $no_soa, $url_to_filename{$source}{comments});
 		$entry_count = $count;
 		my $filename = $url_to_filename{$source}{filename} || basename($source) . '.rpz';
@@ -389,101 +389,102 @@ foreach my $entry (@categorized_sources) {
 		# Check if output file exists and compare hash
 		log_message('DEBUG', "Checking if output file exists: $output_file") if $debug_level >= 2;
 		if (-f $output_file) {
-		  my $existing_content = read_file($output_file, binmode => ':raw') || '';
-		  $existing_content =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
-		  my $existing_hash = sha256_hex($existing_content);
-		  my $clean_rpz_data = $rpz_data;
-		  $clean_rpz_data =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
-		  my $new_content_hash = sha256_hex($clean_rpz_data);
-		  if ($existing_hash eq $new_content_hash) {
+			my $existing_content = read_file($output_file, binmode => ':raw') || '';
+			$existing_content =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
+			my $existing_hash = sha256_hex($existing_content);
+			my $clean_rpz_data = $rpz_data;
+			$clean_rpz_data =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
+			my $new_content_hash = sha256_hex($clean_rpz_data);
+			if ($existing_hash eq $new_content_hash) {
 			log_message('INFO', "Output file $output_file unchanged, skipping write");
 			$skip_update = 1;
 			$file_size = (-s $output_file) / 1024;
 			$file_path = "$category/$filename";
 			$hashes{$source}{domains} = $entry_count;
 			$hashes{$source}{file_size} = $file_size;
-		  } else {
+			} else {
 			log_message('WARNING', "Output file $output_file exists but content changed, overwriting");
-		  }
+			}
 		}
 		unless ($skip_update) {
-		  my $clean_rpz_data = $rpz_data;
-		  $clean_rpz_data =~ s/\x{FEFF}//g; # Remove BOM
-		  $clean_rpz_data =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
-		  open my $fh, '>:raw', $output_file or die "Cannot open $output_file: $!";
-		  print $fh $clean_rpz_data;
-		  close $fh;
-		  $file_size = (-s $output_file) / 1024;
-		  $file_path = "$category/$filename";
-		  log_message('INFO', sprintf("Generated %s: %d entries, %.1f KB", $output_file, $entry_count, $file_size));
-		  $hashes{$source}{domains} = $entry_count;
-		  $hashes{$source}{file_size} = $file_size;
+			my $clean_rpz_data = $rpz_data;
+			$clean_rpz_data =~ s/\x{FEFF}//g; # Remove BOM
+			$clean_rpz_data =~ s/[^\x00-\x7F]//g; # Remove non-ASCII characters
+			open my $fh, '>:raw', $output_file or die "Cannot open $output_file: $!";
+			print $fh $clean_rpz_data;
+			close $fh;
+			$file_size = (-s $output_file) / 1024;
+			$file_path = "$category/$filename";
+			log_message('INFO', sprintf("Generated %s: %d entries, %.1f KB", $output_file, $entry_count, $file_size));
+			$hashes{$source}{domains} = $entry_count;
+			$hashes{$source}{file_size} = $file_size;
 		}
 		$list_stats{$source} = {
-		  domains     => $entry_count,
-		  error       => 0,
-		  time        => time - $list_start,
-		  skipped     => $skip_update,
-		  status      => $skip_update ? 'No Updates' : 'Updated',
-		  file_size   => $file_size,
-		  file_path   => $file_path,
-		  last_updated => strftime("%Y-%m-%d", gmtime),
-		  license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
+			domains     => $entry_count,
+			error       => 0,
+			time        => time - $list_start,
+			skipped     => $skip_update,
+			status      => $skip_update ? 'No Updates' : 'Updated',
+			file_size   => $file_size,
+			file_path   => $file_path,
+			last_updated => strftime("%Y-%m-%d", gmtime),
+			license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
 		};
 		$ok++ unless $skip_update;
 		# Validation
 		if ($validate && !$skip_update) {
-		  log_message('INFO', "Validating $output_file...");
-		  my $validation_output = validate_rpz_file($output_file);
-		  if ($validation_report) {
+			log_message('INFO', "Validating $output_file...");
+			my $validation_output = validate_rpz_file($output_file);
+			if ($validation_report) {
 			open my $vfh, '>>:encoding(UTF-8)', $validation_report or die "Cannot open validation report file '$validation_report': $!\n";
 			print $vfh $validation_output;
 			close $vfh;
-		  } else {
+			} else {
 			print $validation_output;
-		  }
+			}
 		}
-	  } else {
+		} else {
 		$list_stats{$source} = {
-		  domains     => $hashes{$source}{domains} || 0,
-		  error       => 0,
-		  time        => 0,
-		  skipped     => 1,
-		  status      => 'No Updates',
-		  file_size   => $hashes{$source}{file_size} || 0,
-		  file_path   => $url_to_filename{$source}{filename} ? "$category/" . $url_to_filename{$source}{filename} : 'N/A',
-		  last_updated => $hashes{$source}{last_checked} || strftime("%Y-%m-%d", gmtime),
-		  license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
+			domains     => $hashes{$source}{domains} || 0,
+			error       => 0,
+			time        => 0,
+			skipped     => 1,
+			status      => 'No Updates',
+			file_size   => $hashes{$source}{file_size} || 0,
+			file_path   => $url_to_filename{$source}{filename} ? "$category/" . $url_to_filename{$source}{filename} : 'N/A',
+			last_updated => $hashes{$source}{last_checked} || strftime("%Y-%m-%d", gmtime),
+			license     => $url_to_filename{$source}{comments} ? ($url_to_filename{$source}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
 		};
 		$skipped++;
-	  }
+		}
 
 	$total_domains += $entry_count;
 }
 
 # Write status file
 if ($status_report) {
-    open my $status_fh, '>:encoding(UTF-8)', $status_report or die "Cannot open $status_report: $!\n";
-    $total_time = time - $total_time;
-    printf $status_fh "Processed %d sources: %d OK, %d Skipped, %d Failed, %d total domains in %.2f seconds\n", scalar(@categorized_sources), $ok, $skipped, $failed, $total_domains, $total_time;
-    printf $status_fh "HEAD requests: %d, Full downloads: %d\n\n", $head_requests, $full_downloads;
-    print $status_fh "=" x 80 . "\n";
-    print $status_fh sprintf("%-50s %-11s %-14s %s\n", "List", "Domains", "Time (s)", "Status");
-    print $status_fh "-" x 80 . "\n";
-    foreach my $source (sort keys %list_stats) {
-        my $list_name = $url_to_filename{$source}{filename} || basename(URI->new($source)->path) || URI->new($source)->host;
-        printf $status_fh "%-50s %-11d %-14.2f %s\n", $list_name, $list_stats{$source}{domains}, $list_stats{$source}{time}, $list_stats{$source}{status};
-    }
-    print $status_fh "\nFailed sources:\n" if $failed;
-    foreach my $source (sort keys %list_stats) {
-        print $status_fh "$source\n" if $list_stats{$source}{status} eq 'Not Reachable';
-    }
-    # Write status summary
-    my %status_counts;
-    $status_counts{$list_stats{$_}{status}}++ for keys %list_stats;
-    print $status_fh "\nStatus Summary:\n";
-    printf $status_fh "%s: %d\n", $_, $status_counts{$_} || 0 for qw(Updated No Updates Not Reachable Outdated);
-    close $status_fh;
+		open my $status_fh, '>:encoding(UTF-8)', $status_report or die "Cannot open $status_report: $!\n";
+		$total_time = time - $total_time;
+		printf $status_fh "Processed %d sources: %d OK, %d Skipped, %d Failed, %d total domains in %.2f seconds\n", scalar(@categorized_sources), $ok, $skipped, $failed, $total_domains, $total_time;
+		printf $status_fh "HEAD requests: %d, Full downloads: %d\n\n", $head_requests, $full_downloads;
+		print $status_fh "=" x 80 . "\n";
+		print $status_fh sprintf("%-50s %-11s %-14s %s\n", "List", "Domains", "Time (s)", "Status");
+		print $status_fh "-" x 80 . "\n";
+		foreach my $source (sort keys %list_stats) {
+				my $list_name = $url_to_filename{$source}{filename} || basename(URI->new($source)->path) || URI->new($source)->host;
+				printf $status_fh "%-50s %-11d %-14.2f %s\n", $list_name, $list_stats{$source}{domains}, $list_stats{$source}{time}, $list_stats{$source}{status};
+		}
+		print $status_fh "\nFailed sources:\n" if $failed;
+		foreach my $source (sort keys %list_stats) {
+				print $status_fh "$source\n" if $list_stats{$source}{status} eq 'Not Reachable';
+		}
+		# Write status summary
+		my %status_counts;
+		$status_counts{$list_stats{$_}{status}}++ for keys %list_stats;
+		print $status_fh "\nStatus Summary:\n";
+		my @statuses = ('Updated', 'No Updates', 'Not Reachable', 'Outdated');
+		printf $status_fh "%s: %d\n", $_, $status_counts{$_} || 0 for @statuses;
+		close $status_fh;
 }
 
 # Save updated hashes
@@ -492,17 +493,17 @@ open my $hfh, '>:encoding(utf8)', $hash_file or die "Can't open hash file '$hash
 $csv->print($hfh, ['URL', 'Hash', 'ETag', 'Last-Modified', 'Last-Checked', 'Failed-Attempts', 'Domains', 'File-Size']);
 print $hfh "\n";
 foreach my $url (sort keys %hashes) {
-    $csv->print($hfh, [
-        $url,
-        $hashes{$url}{hash},
-        $hashes{$url}{etag},
-        $hashes{$url}{last_modified},
-        $hashes{$url}{last_checked},
-        $hashes{$url}{failed_attempts},
-        $hashes{$url}{domains} || 0,
-        $hashes{$url}{file_size} || 0,
-    ]);
-    print $hfh "\n";
+		$csv->print($hfh, [
+				$url,
+				$hashes{$url}{hash},
+				$hashes{$url}{etag},
+				$hashes{$url}{last_modified},
+				$hashes{$url}{last_checked},
+				$hashes{$url}{failed_attempts},
+				$hashes{$url}{domains} || 0,
+				$hashes{$url}{file_size} || 0,
+		]);
+		print $hfh "\n";
 }
 close $hfh;
 
@@ -512,26 +513,26 @@ print $md_fh "# Blocklist Sources Overview\n\n";
 print $md_fh "| RPZ File URL | Last Updated | Category | Entries | Size | License | File Path | Status |\n";
 print $md_fh "|--------------|--------------|----------|---------|----------|---------|-----------|--------|\n";
 foreach my $entry (@categorized_sources) {
-    my $url = $entry->{url};
-    my $category = $entry->{category};
-    my $stats = $list_stats{$url} || {
-        domains     => $hashes{$url}{domains} || 0,
-        file_size   => $hashes{$url}{file_size} || 0,
-        status      => 'Not Processed',
-        last_updated => $hashes{$url}{last_checked} || 'Unknown',
-        license     => $url_to_filename{$url}{comments} ? ($url_to_filename{$url}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
-        file_path   => $url_to_filename{$url}{filename} ? "$category/" . $url_to_filename{$url}{filename} : 'N/A',
-    };
-    my $status = $stats->{status};
-    if ($hashes{$url}{last_checked} && $stats->{last_updated} ne 'Unknown') {
-        my $last_updated = Time::Piece->strptime($hashes{$url}{last_checked}, "%Y-%m-%dT%H:%M:%SZ");
-        if ((gmtime() - $last_updated) > 30 * 86400) {
-            $status = 'Outdated';
-        }
-    }
-    my $rpz_url = $stats->{file_path} eq 'N/A' ? 'N/A' : "[$stats->{file_path}](https://raw.githubusercontent.com/twitOne/RPZ-Blocklists/main/$stats->{file_path})";
-    my $license = $stats->{license} =~ /http/ ? "[$stats->{license}]($stats->{license})" : $stats->{license};
-    print $md_fh "| $rpz_url | $stats->{last_updated} | $category | $stats->{domains} | " . format_file_size($stats->{file_size}) . " | $license | $stats->{file_path} | $status |\n";
+		my $url = $entry->{url};
+		my $category = $entry->{category};
+		my $stats = $list_stats{$url} || {
+				domains     => $hashes{$url}{domains} || 0,
+				file_size   => $hashes{$url}{file_size} || 0,
+				status      => 'Not Processed',
+				last_updated => $hashes{$url}{last_checked} || 'Unknown',
+				license     => $url_to_filename{$url}{comments} ? ($url_to_filename{$url}{comments} =~ /License: ([^;]+)/ ? $1 : 'Unknown') : 'Unknown',
+				file_path   => $url_to_filename{$url}{filename} ? "$category/" . $url_to_filename{$url}{filename} : 'N/A',
+		};
+		my $status = $stats->{status};
+		if ($hashes{$url}{last_checked} && $stats->{last_updated} ne 'Unknown') {
+				my $last_updated = Time::Piece->strptime($hashes{$url}{last_checked}, "%Y-%m-%dT%H:%M:%SZ");
+				if ((gmtime() - $last_updated) > 30 * 86400) {
+						$status = 'Outdated';
+				}
+		}
+		my $rpz_url = $stats->{file_path} eq 'N/A' ? 'N/A' : "[$stats->{file_path}](https://raw.githubusercontent.com/twitOne/RPZ-Blocklists/main/$stats->{file_path})";
+		my $license = $stats->{license} =~ /http/ ? "[$stats->{license}]($stats->{license})" : $stats->{license};
+		print $md_fh "| $rpz_url | $stats->{last_updated} | $category | $stats->{domains} | " . format_file_size($stats->{file_size}) . " | $license | $stats->{file_path} | $status |\n";
 }
 print $md_fh "\n## Status Definitions\n";
 print $md_fh "- **Updated**: Source was fetched and RPZ file was updated with new content.\n";

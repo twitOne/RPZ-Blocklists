@@ -500,6 +500,35 @@ if ($status_report) {
     close $status_fh;
 }
 
+# Clean up old RPZ files not referenced in urllist.txt or list-mappings.csv
+sub cleanup_old_rpz_files {
+    my ($output_dir, $url_to_filename, $categorized_sources) = @_;
+    my %expected_files;
+
+    # Build list of expected RPZ files from urllist.txt and list-mappings.csv
+    foreach my $entry (@$categorized_sources) {
+        my $url = $entry->{url};
+        my $category = $entry->{category};
+        my $filename = $url_to_filename->{$url}{filename} || basename(URI->new($url)->path) . '.rpz';
+        $filename =~ s/\.[a-z]+$/.rpz/i;
+        $expected_files{"$output_dir/$category/$filename"} = 1;
+    }
+
+    # Check all RPZ files in category directories
+    for my $category_dir (glob "$output_dir/*") {
+        next unless -d $category_dir;
+        for my $file (glob "$category_dir/*.rpz") {
+            unless ($expected_files{$file}) {
+                log_message('INFO', "Removing outdated RPZ file: $file");
+                unlink $file or warn "Failed to delete $file: $!\n";
+            }
+        }
+    }
+}
+
+# Call cleanup function after processing sources
+cleanup_old_rpz_files($output_dir, \%url_to_filename, \@categorized_sources);
+
 # Save updated hashes
 my $csv = Text::CSV->new({ binary => 1, sep_char => ',', auto_diag => 1 });
 open my $hfh, '>:encoding(utf8)', $hash_file or die "Can't open hash file '$hash_file': $!\n";
